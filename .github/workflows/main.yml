@@ -1,0 +1,43 @@
+name: Build APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build the APK
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/app-release.apk FinSight.apk
+
+      - name: Keep APK as a build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FinSight-apk
+          path: FinSight.apk
+
+      - name: Publish APK as a download (Releases)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: FinSight build ${{ github.run_number }}
+          body: Download FinSight.apk below and open it on your Android phone to install or update.
+          files: FinSight.apk
