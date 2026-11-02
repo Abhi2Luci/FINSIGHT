@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Unpack app.zip if the app folder was uploaded as a zip
+        run: |
+          if [ ! -f app/build.gradle ] && [ -f app.zip ]; then unzip -o -q app.zip; fi
+          ls app
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
